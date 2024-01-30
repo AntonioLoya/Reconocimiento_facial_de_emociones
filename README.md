@@ -1,10 +1,12 @@
 
 # Reconocimiento facial de emociones
 
-A brief description of what this project does and who it's for
+Esta es una prueba de detección de emociones basada en la salida de parámetros de clmtrackr.
 
 
 ## Authors
 
-- [@AntonioLoya](https://github.com/AntonioLoya)
+- [@Antonio De Jesus Loya Castillo](https://github.com/AntonioLoya)
+- [@Jhair Martínez Solórzano](https://github.com/JhairM16)
+
 
