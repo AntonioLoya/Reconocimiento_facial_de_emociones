@@ -24,14 +24,16 @@ For tracking in video, it is recommended to use a browser with WebGL support, th
 
 For some more information about Constrained Local Models, take a look at Xiaoguang Yan's [excellent tutorial](https://sites.google.com/site/xgyanhome/home/projects/clm-implementation/ConstrainedLocalModel-tutorial%2Cv0.7.pdf?attredirects=0), which was of great help in implementing this library.
 
-## Authors
-
-- [@Antonio De Jesus Loya Castillo](https://github.com/AntonioLoya)
-- [@Jhair Martínez Solórzano](https://github.com/JhairM16)
 
 
 ### License ###
 
 **clmtrackr** is distributed under the [MIT License](http://www.opensource.org/licenses/MIT)
+
+## Authors
+
+- [@Antonio De Jesus Loya Castillo](https://github.com/AntonioLoya)
+- [@Jhair Martínez Solórzano](https://github.com/JhairM16)
+
 
 
