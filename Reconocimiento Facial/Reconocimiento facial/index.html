@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Reconocimiento facial de emociones</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="./styles/styles.css">
+    <script src="./js/libs/utils.js"></script>
+    <script src="../build/clmtrackr.js"></script>
+    <script src="../models/model_pca_20_svm.js"></script>
+    <script src="./js/libs/Stats.js"></script>
+    <script src="./js/libs/d3.min.js"></script>
+    <script src="./js/emotion_classifier.js"></script>
+    <script src="./js/emotionmodel.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        // getUserMedia only works over https in Chrome 47+, so we redirect to https. Also notify user if running from file.
+        if (window.location.protocol == "file:") {
+            alert("Parece que está ejecutando este ejemplo directamente desde un archivo. Tenga en cuenta que estos ejemplos solo funcionan cuando se sirven desde un servidor o host local debido a las restricciones entre dominios del lienzo.");
+        } else if (window.location.hostname !== "localhost" && window.location.protocol !== "https:") {
+            window.location.protocol = "https";
+        }
+    </script>
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-32642923-1']);
+        _gaq.push(['_trackPageview']);
+
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+</head>
+
+<body>
+
+    <div id="content">
+        <h2>Detección de Emociones</h2>
+        <p>Esta es una prueba de detección de emociones basada en la salida de parámetros de <em>clmtrackr</em>.</p>
+        <div id="container">
+            <video id="videoel" width="400" height="300" preload="auto" loop playsinline autoplay>
+            </video>
+            <canvas id="overlay" width="400" height="300"></canvas>
+        </div>
+        <div id="emotion_icons">
+            <img class="emotion_icon" id="icon1" src="./media/icon_enojado.png">
+            <img class="emotion_icon" id="icon2" src="./media/icon_triste.png">
+            <img class="emotion_icon" id="icon3" src="./media/icon_sorprendido.png">
+            <img class="emotion_icon" id="icon4" src="./media/icon_feliz.png">
+        </div>
+        <div id='emotion_chart'></div>
+    </div>
+    <div id="controls">
+        <div>
+            <input class="btn" type="button" value="Espera, cargando video" disabled="disabled" onclick="startVideo()" id="startbutton" style="width: 200px;">
+            <input class="btn" type="button" value="Detener monitoreo" onclick="stopMonitoring()" id="stopbutton" style="width: 200px;">
+            <input class="btn" type="button" value="Ver resultados" onclick="showResults()" id="showResultsButton" style="width: 200px;">
+            <input class="btn" type="button" value="Limpiar" onclick="clearResults()" id="clearButton" style="width: 200px; display: none;">
+        </div>
+    </div>
+    <!-- Agregar esto al cuerpo de tu HTML -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDetailsModal()">&times;</span>
+            <h3>Detalles de Emociones</h3>
+            <p id="mostPresentEmotion">La emoción más presente fue: </p>
+            <div id="detailsContent"></div>
+        </div>
+    </div>
+    <!-- Contenedor del gráfico (inicialmente oculto) -->
+    <div id="chartContainer" style="display: none;">
+        <svg id="barChart"></svg>
+    </div>
+
+    <script>
+        var emotionHistory = { entries: [] };
+				var centralTendencyData; 
+				var globalCentralTendencyData;
+				var vid = document.getElementById('videoel');
+				var vid_width = vid.width;
+				var vid_height = vid.height;
+				var overlay = document.getElementById('overlay');
+				var overlayCC = overlay.getContext('2d');
+
+				/**** check and set up video/webcam ****/
+				
+				function stopMonitoring() {
+					vid.pause();
+                    ctrack.stop();
+                    trackingStarted = false;
+                    document.getElementById('startbutton').value = "Reanudar video";
+                    document.getElementById('startbutton').disabled = false;
+                }
+
+                var resultsShown = false; // Variable de control para verificar si los resultados ya se han mostrado
+
+                function showResults() {
+                    if (resultsShown) {
+                        alert("Error, esto no está permitido. Los resultados ya han sido mostrados.");
+                        return;
+                    }
+
+                    if (emotionHistory.entries.length === 0) {
+                        alert("Aún no hay datos para mostrar. Active el monitoreo.");
+                        return;
+                    }
+
+                    // Calcular valores de tendencia central
+                    globalCentralTendencyData = calculateCentralTendency(emotionHistory.entries.map(entry => entry.emotions));
+
+                    // Crear un gráfico de barras con d3.js y mostrar el contenedor del gráfico
+                    createBarChart(globalCentralTendencyData);
+                    document.getElementById('chartContainer').style.display = 'block';
+
+                    resultsShown = true; // Establecer la variable de control a true después de mostrar los resultados
+
+                    document.getElementById('clearButton').style.display = 'inline';
+
+                    // Cambiar el texto del botón "Ver resultados" después de mostrarlos
+                    document.getElementById('showResultsButton').value = 'Ver resultados (Mostrados)';
+                }
+
+
+                /*function showResults() {
+                            if (emotionHistory.entries.length === 0) {
+                                alert("Aún no hay datos para mostrar. Active el monitoreo.");
+                                return;
+                            }
+
+                            // Calcular valores de tendencia central
+                            globalCentralTendencyData = calculateCentralTendency(emotionHistory.entries.map(entry => entry.emotions));
+
+                            // Crear un gráfico de barras con d3.js y mostrar el contenedor del gráfico
+                            createBarChart(globalCentralTendencyData);
+                            document.getElementById('chartContainer').style.display = 'block';
+                }*/
+
+                /*function clearChart() {
+                    // Eliminar la gráfica
+                    var chartContainer = document.getElementById('chartContainer');
+                    chartContainer.innerHTML = ''; // Eliminar contenido del contenedor
+                }*/
+
+                function clearResults() {
+                    // Restablecer valores y ocultar resultados
+                    emotionHistory.entries = [];
+                    resultsShown = false;
+                    document.getElementById('chartContainer').style.display = 'none';
+                    document.getElementById('clearButton').style.display = 'none';
+
+                // Borrar la gráfica
+                /*var chartContainer = document.getElementById('chartContainer');
+                chartContainer.innerHTML = '';  // Elimina el contenido del contenedor
+
+                // Ocultar el modal de detalles si está visible
+                var detailsModal = document.getElementById('detailsModal');
+                if (detailsModal.style.display === 'block') {
+                    detailsModal.style.display = 'none';
+                    showFpsIndicator(); // Mostrar nuevamente los fps al cerrar el modal
+                }*/
+
+                // Limpiar la gráfica
+                //clearChart();
+
+                // Recargar la página
+                window.location.reload();
+            }
+
+                function calculateCentralTendency(data) {
+                    var result = {};
+
+                    data.forEach(emotionEntry => {
+                        if (emotionEntry && emotionEntry.forEach) {
+                            emotionEntry.forEach(emotion => {
+                                if (!result[emotion.emotion]) {
+                                    result[emotion.emotion] = [];
+                                }
+
+                    if (typeof emotion.value !== 'undefined' && emotion.value !== null && !isNaN(emotion.value)) {
+                        result[emotion.emotion].push(parseFloat(emotion.value));
+                    }
+                });
+            }
+    });
+
+                // Calcular la media, mediana y moda para cada emoción
+                for (var emotion in result) {
+                    var values = result[emotion];
+                    if (values.length > 0) {
+                        result[emotion] = {
+                            mean: isNaN(d3.mean(values)) ? "N/A" : d3.mean(values).toFixed(2),
+                            median: isNaN(d3.median(values)) ? "N/A" : d3.median(values).toFixed(2),
+                            mode: calculateMode(values).toFixed(2)
+                        };
+                    } else {
+                        // Tratamiento para valores vacíos si es necesario
+                        result[emotion] = {
+                            mean: "N/A",
+                            median: "N/A",
+                            mode: "N/A"
+                        };
+                    }
+                }
+
+                return result;
+            }
+showDetails();
+
+                function showDetails() {
+                    var detailsModal = document.getElementById('detailsModal');
+                    var detailsContent = document.getElementById('detailsContent');
+
+                    // Verificar si hay datos antes de mostrar el modal
+                    if (globalCentralTendencyData && Object.keys(globalCentralTendencyData).length > 0) {
+                        detailsModal.style.display = 'block';
+                        detailsContent.innerHTML = ""; // Limpiar contenido previo
+
+                        // Oculta los fps al mostrar los detalles
+                        hideFpsIndicator();
+
+                        var mostPresentEmotion = getMostPresentEmotion(globalCentralTendencyData);
+                        document.getElementById('mostPresentEmotion').innerText = "Evaluación emocional: " + getSpanishEmotionLabel(mostPresentEmotion);
+
+
+                        for (var emotion in globalCentralTendencyData) {
+                    var container = document.createElement('div');
+
+                    var header = document.createElement('h4');
+                    header.innerText = getSpanishEmotionLabel(emotion);
+                    container.appendChild(header);
+
+                    var meanValue = document.createElement('p');
+                    meanValue.innerText = "Media: " + globalCentralTendencyData[emotion].mean;
+                    container.appendChild(meanValue);
+
+                    var medianValue = document.createElement('p');
+                    medianValue.innerText = "Mediana: " + globalCentralTendencyData[emotion].median;
+                    container.appendChild(medianValue);
+
+                    var modeValue = document.createElement('p');
+                    modeValue.innerText = "Moda: " + globalCentralTendencyData[emotion].mode;
+                    container.appendChild(modeValue);
+
+                    detailsContent.appendChild(container);
+                }
+                    } else {
+                        
+                    }
+                }
+
+                function getSpanishEmotionLabel(emotion) {
+                    // Traducción de las emociones
+                    switch (emotion) {
+                        case 'angry': return 'Enojado';
+                        case 'sad': return 'Triste';
+                        case 'surprised': return 'Sorprendido';
+                        case 'happy': return 'Feliz';
+                        default: return emotion;
+                    }
+                }
+
+                function openDetailsModal() {
+                    showDetails();
+                    hideFpsIndicator();
+                }
+
+                function closeDetailsModal() {
+                    var detailsModal = document.getElementById('detailsModal');
+                    detailsModal.style.display = 'none';
+
+                    // Muestra nuevamente los fps al cerrar el modal
+                    showFpsIndicator();
+                }
+                // ... (resto del código)
+
+                function openDetailsModal() {
+                    var detailsModal = document.getElementById('detailsModal');
+                    detailsModal.style.display = 'block';
+                    hideFpsIndicator();
+                }
+
+                function closeDetailsModal() {
+                    var detailsModal = document.getElementById('detailsModal');
+                    detailsModal.style.display = 'none';
+                    showFpsIndicator();
+                }
+
+
+
+
+
+                function calculateMode(values) {
+                    var frequencyMap = {};
+                    var maxFrequency = 0;
+                    var mode = null;
+
+                    values.forEach(value => {
+                        frequencyMap[value] = (frequencyMap[value] || 0) + 1;
+
+                        if (frequencyMap[value] > maxFrequency) {
+                            maxFrequency = frequencyMap[value];
+                            mode = value;
+                        }
+                    });
+
+                    return mode;
+                }
+
+               // ...
+
+               function createBarChart(data) {
+                    // Configuración del lienzo
+                    var margin = { top: 20, right: 20, bottom: 50, left: 40 },
+                        width = 500 - margin.left - margin.right,
+                        height = 300 - margin.top - margin.bottom;
+
+                    // Escalas
+                    var x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+                    var y = d3.scaleLinear().range([height, 0]);
+
+                    // Ejes
+                    var xAxis = d3.axisBottom(x);
+                    var yAxis = d3.axisLeft(y).ticks(10, "%");
+
+                    // SVG
+                    var svg = d3.select("#content").append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    // Datos
+                    var emotions = Object.keys(data);
+
+                    // Dominios
+                    x.domain(emotions);
+                    y.domain([0, d3.max(emotions, function (emotion) { return data[emotion].mean; })]);
+
+                    // Ejes
+                    svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis)
+                        .selectAll("text")
+                        .style("text-anchor", "end")
+                        .attr("dx", "-.8em")
+                        .attr("dy", "-.55em")
+                        .attr("transform", "rotate(-45)");
+
+                    svg.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis)
+                        .append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", 6)
+                        .attr("dy", ".71em")
+                        .style("text-anchor", "end")
+                        .text("Valor");
+
+                    // Barras con transición
+                    emotions.forEach(function (emotion) {
+                        var bar = svg.selectAll(".bar-" + emotion)
+                            .data([data[emotion]])
+                            .enter().append("rect")
+                            .attr("class", "bar-" + emotion)
+                            .attr("x", function () { return x(emotion); })
+                            .attr("width", x.bandwidth())
+                            .attr("y", height)
+                            .attr("height", 0)
+                            .transition() // Agregar transición
+                            .duration(1300) // Duración de la transición en milisegundos
+                            .attr("y", function (d) { return y(d.mean); })
+                            .attr("height", function (d) { return height - y(d.mean); });
+                    });
+                            // Botón para ver detalles
+                    svg.append("text")
+                            .attr("class", "details-button")
+                            .attr("x", width - 10)
+                            .attr("y", height + margin.bottom - 10)
+                            .style("text-anchor", "end")
+                            .style("cursor", "pointer")
+                            .text("Ver detalles")
+                            .on("click", function () {
+                                showDetails(centralTendencyData);
+                            });
+                        }
+
+
+
+
+                function hideFpsIndicator() {
+                    stats.domElement.style.display = 'none';
+                }
+                
+
+                function showFpsIndicator() {
+                    stats.domElement.style.display = 'block';
+                }
+                function getMostPresentEmotion(data) {
+                    var mostPresentEmotion = null;
+                    var maxMeanValue = -1;
+
+                    for (var emotion in data) {
+                        var meanValue = parseFloat(data[emotion].mean);
+                        if (!isNaN(meanValue) && meanValue > maxMeanValue) {
+                            maxMeanValue = meanValue;
+                            mostPresentEmotion = emotion;
+                        }
+                    }
+
+                    return mostPresentEmotion;
+                }
+
+
+
+
+				function enablestart() {
+					var startbutton = document.getElementById('startbutton');
+					startbutton.value = "Iniciar video";
+					startbutton.disabled = null;
+				}
+
+				function adjustVideoProportions() {
+					// resize overlay and video if proportions are different
+					// keep same height, just change width
+					var proportion = vid.videoWidth/vid.videoHeight;
+					vid_width = Math.round(vid_height * proportion);
+					vid.width = vid_width;
+					overlay.width = vid_width;
+				}
+
+				function gumSuccess( stream ) {
+					// add camera stream if getUserMedia succeeded
+					if ("srcObject" in vid) {
+						vid.srcObject = stream;
+					} else {
+						vid.src = (window.URL && window.URL.createObjectURL(stream));
+					}
+					vid.onloadedmetadata = function() {
+						adjustVideoProportions();
+						vid.play();
+					}
+					vid.onresize = function() {
+						adjustVideoProportions();
+						if (trackingStarted) {
+							ctrack.stop();
+							ctrack.reset();
+							ctrack.start(vid);
+						}
+					}
+				}
+
+				function gumFail() {
+					alert("Hubo algún problema al intentar obtener video de su cámara web. Si tiene una cámara web, asegúrese de aceptar cuando el navegador le pida acceso a su cámara web..");
+				}
+
+				navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+				window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
+
+				// check for camerasupport
+				if (navigator.mediaDevices) {
+					navigator.mediaDevices.getUserMedia({video : true}).then(gumSuccess).catch(gumFail);
+				} else if (navigator.getUserMedia) {
+					navigator.getUserMedia({video : true}, gumSuccess, gumFail);
+				} else {
+					alert("Esta demostración depende de getUserMedia, que su navegador no parece ser compatible. :(");
+				}
+
+				vid.addEventListener('canplay', enablestart, false);
+
+				/**** setup of emotion detection ******/
+
+				// set eigenvector 9 and 11 to not be regularized. This is to better detect motion of the eyebrows
+				pModel.shapeModel.nonRegularizedVectors.push(9);
+				pModel.shapeModel.nonRegularizedVectors.push(11);
+
+				var ctrack = new clm.tracker({useWebGL : true});
+				ctrack.init(pModel);
+				var trackingStarted = false;
+
+				function startVideo() {
+					// start video
+					vid.play();
+					// start tracking
+					ctrack.start(vid);
+					trackingStarted = true;
+					// start loop to draw face
+					drawLoop();
+				}
+
+				function drawLoop() {
+					requestAnimFrame(drawLoop);
+                    overlayCC.clearRect(0, 0, vid_width, vid_height);
+
+                    if (trackingStarted) {
+                        ctrack.draw(overlay);
+
+                        var cp = ctrack.getCurrentParameters();
+                        var er = ec.meanPredict(cp);
+
+                        if (er) {
+                            updateData(er);
+
+                            // Agrega el registro al historial de emociones
+                            emotionHistory.entries.push({
+                    timestamp: new Date(),
+                    emotions: er.map(item => ({ emotion: item.emotion, value: item.value.toFixed(1) }))
+                });
+                        for (var i = 0; i < er.length; i++) {
+                            if (er[i].value > 0.4) {
+                                document.getElementById('icon' + (i + 1)).style.visibility = 'visible';
+                            } else {
+                                document.getElementById('icon' + (i + 1)).style.visibility = 'hidden';
+                            }
+            }
+        }
+    }
+				}
+				
+
+				delete emotionModel['disgusted'];
+				delete emotionModel['fear'];
+				var ec = new emotionClassifier();
+				ec.init(emotionModel);
+				var emotionData = ec.getBlank();
+
+				/**** d3 code for barchart *******/
+
+				var margin = {top : 20, right : 20, bottom : 10, left : 40},
+					width = 400 - margin.left - margin.right,
+					height = 100 - margin.top - margin.bottom;
+
+				var barWidth = 30;
+
+				var formatPercent = d3.format(".0%");
+
+				var x = d3.scale.linear()
+					.domain([0, ec.getEmotions().length]).range([margin.left, width+margin.left]);
+
+				var y = d3.scale.linear()
+					.domain([0,1]).range([0, height]);
+
+				var svg = d3.select("#emotion_chart").append("svg")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom)
+
+				svg.selectAll("rect").
+					data(emotionData).
+					enter().
+					append("svg:rect").
+					attr("x", function(datum, index) { return x(index); }).
+					attr("y", function(datum) { return height - y(datum.value); }).
+					attr("height", function(datum) { return y(datum.value); }).
+					attr("width", barWidth).
+					attr("fill", "#2d578b");
+
+                    svg.selectAll("text.labels").
+                    data(emotionData).
+                    enter().
+                    append("svg:text").
+                    attr("x", function(datum, index) { return x(index) + barWidth; }).
+                    attr("y", function(datum) { return height - y(datum.value); }).
+                    attr("dx", -barWidth/2).
+                    attr("dy", "1.2em").
+                    attr("text-anchor", "middle").
+                    text(function(datum) {
+                        // Traducción de las emociones
+                        switch (datum.emotion) {
+                            case 'angry': return 'Enojado';
+                            case 'sad': return 'Triste';
+                            case 'surprised': return 'Sorprendido';
+                            case 'happy': return 'Feliz';
+                            default: return datum.emotion;
+                        }
+                    }).
+                    attr("fill", "white").
+                    attr("class", "labels");
+
+
+                                    svg.selectAll("text.yAxis").
+                    data(emotionData).
+                    enter().append("svg:text").
+                    attr("x", function(datum, index) { return x(index) + barWidth; }).
+                    attr("y", height).
+                    attr("dx", -barWidth/2).
+                    attr("text-anchor", "middle").
+                    attr("style", "font-size: 12").
+                    text(function(datum) {
+                        // Traducción de las emociones
+                        switch (datum.emotion) {
+                            case 'angry': return 'Enojado';
+                            case 'sad': return 'Triste';
+                            case 'surprised': return 'Sorprendido';
+                            case 'happy': return 'Feliz';
+                            default: return datum.emotion;
+                        }
+                    }).
+                    attr("transform", "translate(0, 18)").
+                    attr("class", "yAxis");
+					
+
+				function updateData(data) {
+					// update
+					var rects = svg.selectAll("rect")
+						.data(data)
+						.attr("y", function(datum) { return height - y(datum.value); })
+						.attr("height", function(datum) { return y(datum.value); });
+					var texts = svg.selectAll("text.labels")
+						.data(data)
+						.attr("y", function(datum) { return height - y(datum.value); })
+						.text(function(datum) { return datum.value.toFixed(1);});
+
+					// enter
+					rects.enter().append("svg:rect");
+					texts.enter().append("svg:text");
+
+					// exit
+					rects.exit().remove();
+					texts.exit().remove();
+				}
+
+				/*** stats ***/
+
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				document.getElementById('container').appendChild( stats.domElement );
+
+				// update stats on every iteration
+				document.addEventListener('clmtrackrIteration', function(event) {
+					stats.update();
+				}, false);
+
+    </script>
+    </div>
+</body>
+</html>
