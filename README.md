@@ -1,8 +1,6 @@
 
 # Reconocimiento facial de emociones
 
-Esta es una prueba de detección de emociones basada en la salida de parámetros de clmtrackr.
-
 
 
 clmtrackr
