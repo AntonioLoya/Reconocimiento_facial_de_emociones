@@ -276,7 +276,7 @@ showDetails();
                     // Muestra nuevamente los fps al cerrar el modal
                     showFpsIndicator();
                 }
-                // ... (resto del código)
+                
 
                 function openDetailsModal() {
                     var detailsModal = document.getElementById('detailsModal');
@@ -311,9 +311,9 @@ showDetails();
                     return mode;
                 }
 
-               // ...
+               
 
-               function createBarChart(data) {
+                    function createBarChart(data) {
                     // Configuración del lienzo
                     var margin = { top: 20, right: 20, bottom: 50, left: 40 },
                         width = 500 - margin.left - margin.right,
@@ -326,6 +326,15 @@ showDetails();
                     // Ejes
                     var xAxis = d3.axisBottom(x);
                     var yAxis = d3.axisLeft(y).ticks(10, "%");
+
+                    // Colores para cada emoción
+                    var emotionColors = {
+                        'angry': '#6BCCF2',
+                        'sad': '#ACF2EB',
+                        'surprised': '#F27F1B',
+                        'happy': '#BF3124'
+                    
+                    };
 
                     // SVG
                     var svg = d3.select("#content").append("svg")
@@ -375,10 +384,12 @@ showDetails();
                             .transition() // Agregar transición
                             .duration(1300) // Duración de la transición en milisegundos
                             .attr("y", function (d) { return y(d.mean); })
-                            .attr("height", function (d) { return height - y(d.mean); });
+                            .attr("height", function (d) { return height - y(d.mean); })
+                            .attr("fill", emotionColors[emotion]); // Asignar color según la emoción
                     });
-                            // Botón para ver detalles
-                    svg.append("text")
+
+                        // Botón para ver detalles
+                        svg.append("text")
                             .attr("class", "details-button")
                             .attr("x", width - 10)
                             .attr("y", height + margin.bottom - 10)
@@ -388,10 +399,7 @@ showDetails();
                             .on("click", function () {
                                 showDetails(centralTendencyData);
                             });
-                        }
-
-
-
+                    }
 
                 function hideFpsIndicator() {
                     stats.domElement.style.display = 'none';
@@ -591,6 +599,7 @@ showDetails();
                     attr("text-anchor", "middle").
                     attr("style", "font-size: 12").
                     text(function(datum) {
+                        
                         // Traducción de las emociones
                         switch (datum.emotion) {
                             case 'angry': return 'Enojado';
