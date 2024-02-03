@@ -59,8 +59,9 @@
         <div>
             <input class="btn" type="button" value="Espera, cargando video" disabled="disabled" onclick="startVideo()" id="startbutton" style="width: 200px;">
             <input class="btn" type="button" value="Detener monitoreo" onclick="stopMonitoring()" id="stopbutton" style="width: 200px;">
-            <input class="btn" type="button" value="Ver resultados" onclick="showResults()" id="showResultsButton" style="width: 200px;">
+            <input class="btn" type="button" value="Ver resultados" onclick="showResults()" id="showResultsButton" style="width: 200px; ">
             <input class="btn" type="button" value="Limpiar" onclick="clearResults()" id="clearButton" style="width: 200px; display: none;">
+           
         </div>
     </div>
     
@@ -78,7 +79,9 @@
     </div>
 
     <script>
-        var emotionHistory = { entries: [] };
+                var mediaRecorder;
+                var recordedChunks = [];
+                var emotionHistory = { entries: [] };
 				var centralTendencyData; 
 				var globalCentralTendencyData;
 				var vid = document.getElementById('videoel');
@@ -88,11 +91,60 @@
 				var overlayCC = overlay.getContext('2d');
 
 				/**** check and set up video/webcam ****/
+				function startRecording() {
+                    if (typeof MediaRecorder === 'undefined') {
+                        alert("La grabación de medios no es compatible en este navegador.");
+                        return;
+                    }
+
+                    recordedChunks = [];
+                    var options = { mimeType: 'video/webm; codecs=vp9' };
+
+                    try {
+                        mediaRecorder = new MediaRecorder(vid.srcObject, options);
+                    } catch (e) {
+                        console.error('Error creating MediaRecorder:', e);
+                        return;
+                    }
+
+                    mediaRecorder.ondataavailable = handleDataAvailable;
+                    mediaRecorder.onstop = handleRecordingStop;
+
+                    mediaRecorder.start();
+                }
+
+                function stopRecording() {
+                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.stop();
+                    }
+                }
+                function handleDataAvailable(event) {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                }
+
+                function handleRecordingStop() {
+                    var blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    var url = URL.createObjectURL(blob);
+
+                    // Puedes utilizar el blob o la URL para guardar o mostrar el video grabado.
+                    // Por ejemplo, podrías crear un enlace para descargar el video:
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'grabacion.webm';
+                    a.textContent = 'Descargar Grabación';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
 				
-				function stopMonitoring() {
-					vid.pause();
+                function stopMonitoring() {
+                    vid.pause();
                     ctrack.stop();
                     trackingStarted = false;
+                    // stop recording
+                    stopRecording();
                     document.getElementById('startbutton').value = "Reanudar video";
                     document.getElementById('startbutton').disabled = false;
                 }
@@ -100,15 +152,20 @@
                 var resultsShown = false; // Variable de control para verificar si los resultados ya se han mostrado
 
                 function showResults() {
-                    if (resultsShown) {
-                        alert("Error, esto no está permitido. Los resultados ya han sido mostrados.");
-                        return;
-                    }
+                    if (trackingStarted) {
+                    alert("¡Detén el monitoreo primero antes de ver los resultados!");
+                    return;
+                }
 
-                    if (emotionHistory.entries.length === 0) {
-                        alert("Aún no hay datos para mostrar. Active el monitoreo.");
-                        return;
-                    }
+                if (resultsShown) {
+                    alert("Error, esto no está permitido. Los resultados ya han sido mostrados.");
+                    return;
+                }
+
+                if (emotionHistory.entries.length === 0) {
+                    alert("Aún no hay datos para mostrar. Active el monitoreo.");
+                    return;
+                }
 
                     // Calcular valores de tendencia central
                     globalCentralTendencyData = calculateCentralTendency(emotionHistory.entries.map(entry => entry.emotions));
@@ -313,7 +370,7 @@ showDetails();
 
                
 
-                    function createBarChart(data) {
+                function createBarChart(data) {
                     // Configuración del lienzo
                     var margin = { top: 20, right: 20, bottom: 50, left: 40 },
                         width = 500 - margin.left - margin.right,
@@ -492,15 +549,18 @@ showDetails();
 				var trackingStarted = false;
 
 				function startVideo() {
-					// start video
-					vid.play();
-					// start tracking
-					ctrack.start(vid);
-					trackingStarted = true;
-					// start loop to draw face
-					drawLoop();
-				}
+                // start video
+                vid.play();
+                // start tracking
+                ctrack.start(vid);
+                trackingStarted = true;
 
+                // start recording
+                startRecording();
+
+                // start loop to draw face
+                drawLoop();
+            }
 				function drawLoop() {
 					requestAnimFrame(drawLoop);
                     overlayCC.clearRect(0, 0, vid_width, vid_height);
