@@ -127,9 +127,6 @@
                 function handleRecordingStop() {
                     var blob = new Blob(recordedChunks, { type: 'video/webm' });
                     var url = URL.createObjectURL(blob);
-
-                    // Puedes utilizar el blob o la URL para guardar o mostrar el video grabado.
-                    // Por ejemplo, podrías crear un enlace para descargar el video:
                     var a = document.createElement('a');
                     a.href = url;
                     a.download = 'grabacion.webm';
@@ -491,8 +488,6 @@ showDetails();
 				}
 
 				function adjustVideoProportions() {
-					// resize overlay and video if proportions are different
-					// keep same height, just change width
 					var proportion = vid.videoWidth/vid.videoHeight;
 					vid_width = Math.round(vid_height * proportion);
 					vid.width = vid_width;
@@ -500,7 +495,6 @@ showDetails();
 				}
 
 				function gumSuccess( stream ) {
-					// add camera stream if getUserMedia succeeded
 					if ("srcObject" in vid) {
 						vid.srcObject = stream;
 					} else {
