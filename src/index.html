@@ -137,51 +137,51 @@
                 }
 				
                 function startMonitoring() {
-    // start video
-    vid.play();
-    // start tracking
-    ctrack.start(vid);
-    trackingStarted = true;
+                    // start video
+                    vid.play();
+                    // start tracking
+                    ctrack.start(vid);
+                    trackingStarted = true;
 
-    // start recording
-    startRecording();
+                    // start recording
+                    startRecording();
 
-    // start loop to draw face
-    drawLoop();
+                    // start loop to draw face
+                    drawLoop();
 
-    // Mostrar alerta para limpiar la página
-    alert("Recuerde limpiar la página antes de continuar.");
-}
+                    // Mostrar alerta para limpiar la página
+                    alert("Recuerde limpiar la página antes de continuar.");
+                }
 
-function stopMonitoring() {
-    if (resultsShown) {
-        alert("Limpia la página para iniciar el monitoreo.");
-        return;
-    }
+                function stopMonitoring() {
+                    if (resultsShown) {
+                        alert("Limpia la página para iniciar el monitoreo.");
+                        return;
+                    }
 
-    if (!trackingStarted) {
-        alert("¡Debe iniciar el monitoreo primero!");
-        return;
-    }
+                    if (!trackingStarted) {
+                        alert("¡Debe iniciar el monitoreo primero!");
+                        return;
+                    }
 
-    vid.pause();
-    ctrack.stop();
-    trackingStarted = false;
+                    vid.pause();
+                    ctrack.stop();
+                    trackingStarted = false;
 
-    // Preguntar al usuario si desea guardar la grabación
-    var confirmation = confirm("¿Desea guardar la grabación?");
-    if (confirmation) {
-        // Guardar la grabación
-        stopRecording();
-    } else {
-        // Mostrar un mensaje informando al usuario que puede ver los resultados
-        alert("Puede ver los resultados sin guardar la grabación.");
-    }
+                    // Preguntar al usuario si desea guardar la grabación
+                    var confirmation = confirm("¿Desea guardar la grabación?");
+                    if (confirmation) {
+                        // Guardar la grabación
+                        stopRecording();
+                    } else {
+                        // Mostrar un mensaje informando al usuario que puede ver los resultados
+                        alert("Puede ver los resultados sin guardar la grabación.");
+                    }
 
-    // Cambiar el texto del botón "Iniciar video"
-    document.getElementById('startbutton').value = "Reanudar video";
-    document.getElementById('startbutton').disabled = false;
-}
+                    // Cambiar el texto del botón "Iniciar video"
+                    document.getElementById('startbutton').value = "Reanudar video";
+                    document.getElementById('startbutton').disabled = false;
+                }
 
 
 
@@ -280,7 +280,7 @@ function stopMonitoring() {
                     }
                 });
             }
-    });
+        });
 
                 // Calcular la media, mediana y moda para cada emoción
                 for (var emotion in result) {
@@ -303,7 +303,7 @@ function stopMonitoring() {
 
                 return result;
             }
-showDetails();
+            showDetails();
 
                 function showDetails() {
                     var detailsModal = document.getElementById('detailsModal');
@@ -319,8 +319,7 @@ showDetails();
 
                         var mostPresentEmotion = getMostPresentEmotion(globalCentralTendencyData);
                         document.getElementById('mostPresentEmotion').innerText = "Evaluación emocional: " + getSpanishEmotionLabel(mostPresentEmotion);
-
-
+                        
                         for (var emotion in globalCentralTendencyData) {
                     var container = document.createElement('div');
 
@@ -584,9 +583,9 @@ showDetails();
 
 				function startVideo() {
                     if (resultsShown) {
-        alert("Limpia la página para iniciar el monitoreo.");
-        return;
-    }
+                        alert("Limpia la página para iniciar el monitoreo.");
+                        return;
+                    }
 
                 // start video
                 vid.play();
@@ -615,19 +614,19 @@ showDetails();
 
                             // Agrega el registro al historial de emociones
                             emotionHistory.entries.push({
-                    timestamp: new Date(),
-                    emotions: er.map(item => ({ emotion: item.emotion, value: item.value.toFixed(1) }))
-                });
-                        for (var i = 0; i < er.length; i++) {
+                                timestamp: new Date(),
+                                emotions: er.map(item => ({ emotion: item.emotion, value: item.value.toFixed(1) }))
+                            });
+                            for (var i = 0; i < er.length; i++) {
                             if (er[i].value > 0.4) {
                                 document.getElementById('icon' + (i + 1)).style.visibility = 'visible';
                             } else {
                                 document.getElementById('icon' + (i + 1)).style.visibility = 'hidden';
                             }
-            }
-        }
-    }
-				}
+                         }
+                        }
+                    }
+                }
 				
 
 				delete emotionModel['disgusted'];
@@ -730,7 +729,7 @@ showDetails();
 					// exit
 					rects.exit().remove();
 					texts.exit().remove();
-				}
+                }
 
 				/*** stats ***/
 
