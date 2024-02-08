@@ -92,26 +92,32 @@
 
 				/**** check and set up video/webcam ****/
 				function startRecording() {
-                    if (typeof MediaRecorder === 'undefined') {
-                        alert("La grabación de medios no es compatible en este navegador.");
-                        return;
-                    }
+    if (typeof MediaRecorder === 'undefined') {
+        alert("La grabación de medios no es compatible en este navegador.");
+        return;
+    }
 
-                    recordedChunks = [];
-                    var options = { mimeType: 'video/webm; codecs=vp9' };
+    recordedChunks = [];
+    var options = { mimeType: 'video/webm; codecs=vp9' };
 
-                    try {
-                        mediaRecorder = new MediaRecorder(vid.srcObject, options);
-                    } catch (e) {
-                        console.error('Error creating MediaRecorder:', e);
-                        return;
-                    }
+    try {
+        navigator.mediaDevices.getDisplayMedia({ video: true }) // Captura de pantalla
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream, options);
+            mediaRecorder.ondataavailable = handleDataAvailable;
+            mediaRecorder.onstop = handleRecordingStop;
 
-                    mediaRecorder.ondataavailable = handleDataAvailable;
-                    mediaRecorder.onstop = handleRecordingStop;
-
-                    mediaRecorder.start();
-                }
+            mediaRecorder.start();
+        })
+        .catch(err => {
+            console.error('Error al capturar la pantalla:', err);
+            alert('Error al capturar la pantalla: ' + err.message);
+        });
+    } catch (e) {
+        console.error('Error creando MediaRecorder:', e);
+        alert('Error creando MediaRecorder: ' + e.message);
+    }
+}
 
                 function stopRecording() {
                     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -125,16 +131,18 @@
                 }
 
                 function handleRecordingStop() {
-                    var blob = new Blob(recordedChunks, { type: 'video/webm' });
-                    var url = URL.createObjectURL(blob);
-                    var a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'grabacion.webm';
-                    a.textContent = 'Descargar Grabación';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                }
+    var blob = new Blob(recordedChunks, { type: 'video/webm' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'grabacion.webm';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Limpiar grabación después de guardarla
+    recordedChunks = [];
+}
 				
                 function startMonitoring() {
                     // start video
@@ -154,38 +162,26 @@
                 }
 
                 function stopMonitoring() {
-                    if (resultsShown) {
-                        alert("Limpia la página para iniciar el monitoreo.");
-                        return;
-                    }
+    if (resultsShown) {
+        alert("Limpia la página para iniciar el monitoreo.");
+        return;
+    }
 
-                    if (!trackingStarted) {
-                        alert("¡Debe iniciar el monitoreo primero!");
-                        return;
-                    }
+    if (!trackingStarted) {
+        alert("¡Debe iniciar el monitoreo primero!");
+        return;
+    }
 
-                    vid.pause();
-                    ctrack.stop();
-                    trackingStarted = false;
+    vid.pause();
+    ctrack.stop();
+    trackingStarted = false;
 
-                    // Preguntar al usuario si desea guardar la grabación
-                    var confirmation = confirm("¿Desea guardar la grabación?");
-                    if (confirmation) {
-                        // Guardar la grabación
-                        stopRecording();
-                    } else {
-                        // Mostrar un mensaje informando al usuario que puede ver los resultados
-                        alert("Puede ver los resultados sin guardar la grabación.");
-                    }
+    // Cambiar el texto del botón "Iniciar video"
+    document.getElementById('startbutton').value = "Reanudar video";
+    document.getElementById('startbutton').disabled = false;
 
-                    // Cambiar el texto del botón "Iniciar video"
-                    document.getElementById('startbutton').value = "Reanudar video";
-                    document.getElementById('startbutton').disabled = false;
-                }
-
-
-
-
+    // No se inicia la grabación aquí, se manejará en handleRecordingStop()
+}
                 var resultsShown = false; // Variable de control para verificar si los resultados ya se han mostrado
 
                 function showResults() {
