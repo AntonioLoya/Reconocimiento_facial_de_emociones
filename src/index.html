@@ -136,15 +136,55 @@
                     document.body.removeChild(a);
                 }
 				
-                function stopMonitoring() {
-                    vid.pause();
-                    ctrack.stop();
-                    trackingStarted = false;
-                    // stop recording
-                    stopRecording();
-                    document.getElementById('startbutton').value = "Reanudar video";
-                    document.getElementById('startbutton').disabled = false;
-                }
+                function startMonitoring() {
+    // start video
+    vid.play();
+    // start tracking
+    ctrack.start(vid);
+    trackingStarted = true;
+
+    // start recording
+    startRecording();
+
+    // start loop to draw face
+    drawLoop();
+
+    // Mostrar alerta para limpiar la página
+    alert("Recuerde limpiar la página antes de continuar.");
+}
+
+function stopMonitoring() {
+    if (resultsShown) {
+        alert("Limpia la página para iniciar el monitoreo.");
+        return;
+    }
+
+    if (!trackingStarted) {
+        alert("¡Debe iniciar el monitoreo primero!");
+        return;
+    }
+
+    vid.pause();
+    ctrack.stop();
+    trackingStarted = false;
+
+    // Preguntar al usuario si desea guardar la grabación
+    var confirmation = confirm("¿Desea guardar la grabación?");
+    if (confirmation) {
+        // Guardar la grabación
+        stopRecording();
+    } else {
+        // Mostrar un mensaje informando al usuario que puede ver los resultados
+        alert("Puede ver los resultados sin guardar la grabación.");
+    }
+
+    // Cambiar el texto del botón "Iniciar video"
+    document.getElementById('startbutton').value = "Reanudar video";
+    document.getElementById('startbutton').disabled = false;
+}
+
+
+
 
                 var resultsShown = false; // Variable de control para verificar si los resultados ya se han mostrado
 
@@ -155,7 +195,7 @@
                 }
 
                 if (resultsShown) {
-                    alert("Error, esto no está permitido. Los resultados ya han sido mostrados.");
+                    alert("Los resultados ya han sido mostrados, limpie lapágina.");
                     return;
                 }
 
@@ -543,6 +583,11 @@ showDetails();
 				var trackingStarted = false;
 
 				function startVideo() {
+                    if (resultsShown) {
+        alert("Limpia la página para iniciar el monitoreo.");
+        return;
+    }
+
                 // start video
                 vid.play();
                 // start tracking
