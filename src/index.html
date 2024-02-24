@@ -57,16 +57,16 @@
     </div>
     <div id="controls">
         <div>
-            <input class="btn" type="button" value="Espera, cargando video" disabled="disabled" onclick="startVideo()" id="startbutton" style="width: 200px;">
-            <input class="btn" type="button" value="Detener monitoreo" onclick="stopMonitoring()" id="stopbutton" style="width: 200px;">
-            <input class="btn" type="button" value="Ver resultados" onclick="showResults()" id="showResultsButton" style="width: 200px; ">
-            <input class="btn" type="button" value="Limpiar" onclick="clearResults()" id="clearButton" style="width: 200px; display: none;">
+            <input class="btn" type="button" value="Espera, cargando video" disabled="disabled" onclick="startVideo()" id="startbutton" style="width: 250px;">
+            <input class="btn" type="button" value="Detener monitoreo" onclick="stopMonitoring()" id="stopbutton" style="width: 250px;">
+            <input class="btn" type="button" value="Ver resultados" onclick="showResults()" id="showResultsButton" style="width: 250px; ">
+            <input class="btn" type="button" value="Limpiar" onclick="clearResults()" id="clearButton" style="width: 250px; display: none;">
            
         </div>
     </div>
     
     <div id="detailsModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content flip-scale-up-diag-2"> <!-- Aquí agregamos la clase flip-scale-up-diag-2 -->
             <span class="close" onclick="closeDetailsModal()">&times;</span>
             <h3>Detalles de Emociones</h3>
             <p id="mostPresentEmotion">La emoción más presente fue: </p>
@@ -92,32 +92,32 @@
 
 				/**** check and set up video/webcam ****/
 				function startRecording() {
-    if (typeof MediaRecorder === 'undefined') {
-        alert("La grabación de medios no es compatible en este navegador.");
-        return;
-    }
+                    if (typeof MediaRecorder === 'undefined') {
+                        alert("La grabación de medios no es compatible en este navegador.");
+                        return;
+                    }
 
-    recordedChunks = [];
-    var options = { mimeType: 'video/webm; codecs=vp9' };
+                    recordedChunks = [];
+                    var options = { mimeType: 'video/webm; codecs=vp9' };
 
-    try {
-        navigator.mediaDevices.getDisplayMedia({ video: true }) // Captura de pantalla
-        .then(stream => {
-            mediaRecorder = new MediaRecorder(stream, options);
-            mediaRecorder.ondataavailable = handleDataAvailable;
-            mediaRecorder.onstop = handleRecordingStop;
+                    try {
+                        navigator.mediaDevices.getDisplayMedia({ video: true }) // Captura de pantalla
+                        .then(stream => {
+                            mediaRecorder = new MediaRecorder(stream, options);
+                            mediaRecorder.ondataavailable = handleDataAvailable;
+                            mediaRecorder.onstop = handleRecordingStop;
 
-            mediaRecorder.start();
-        })
-        .catch(err => {
-            console.error('Error al capturar la pantalla:', err);
-            alert('Error al capturar la pantalla: ' + err.message);
-        });
-    } catch (e) {
-        console.error('Error creando MediaRecorder:', e);
-        alert('Error creando MediaRecorder: ' + e.message);
-    }
-}
+                            mediaRecorder.start();
+                        })
+                        .catch(err => {
+                            console.error('Error al capturar la pantalla:', err);
+                            alert('Error al capturar la pantalla: ' + err.message);
+                        });
+                    } catch (e) {
+                        console.error('Error creando MediaRecorder:', e);
+                        alert('Error creando MediaRecorder: ' + e.message);
+                    }
+                }
 
                 function stopRecording() {
                     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -131,57 +131,67 @@
                 }
 
                 function handleRecordingStop() {
-    var blob = new Blob(recordedChunks, { type: 'video/webm' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'grabacion.webm';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+                    var blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'grabacion.webm';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
 
-    // Limpiar grabación después de guardarla
-    recordedChunks = [];
-}
+                    // Limpiar grabación después de guardarla
+                    recordedChunks = [];
+                }
 				
-                function startMonitoring() {
-                    // start video
-                    vid.play();
-                    // start tracking
-                    ctrack.start(vid);
-                    trackingStarted = true;
+                function stopRecording() {
+                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.stop();
+                    }
+                }
+                function handleDataAvailable(event) {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                }
+                function scrollToChartContainer(targetPosition, currentScrollPosition) {
+                    var scrollStep = 20; // Cantidad de píxeles a desplazar en cada paso
+                    var scrollDelay = 10; // Retardo entre cada paso
 
-                    // start recording
-                    startRecording();
-
-                    // start loop to draw face
-                    drawLoop();
-
-                    // Mostrar alerta para limpiar la página
-                    alert("Recuerde limpiar la página antes de continuar.");
+                    if (currentScrollPosition <= targetPosition) {
+                        var newScrollPosition = currentScrollPosition + scrollStep;
+                        if (newScrollPosition >= targetPosition) {
+                            window.scrollTo(0, targetPosition);
+                        } else {
+                            window.scrollTo(0, newScrollPosition);
+                            setTimeout(function() {
+                                scrollToChartContainer(targetPosition, newScrollPosition);
+                            }, scrollDelay);
+                        }
+                    }
                 }
 
                 function stopMonitoring() {
-    if (resultsShown) {
-        alert("Limpia la página para iniciar el monitoreo.");
-        return;
-    }
+                    if (resultsShown) {
+                        alert("Limpia la página para iniciar el monitoreo.");
+                        return;
+                    }
 
-    if (!trackingStarted) {
-        alert("¡Debe iniciar el monitoreo primero!");
-        return;
-    }
+                    if (!trackingStarted) {
+                        alert("¡Debe iniciar el monitoreo primero!");
+                        return;
+                    }
 
-    vid.pause();
-    ctrack.stop();
-    trackingStarted = false;
+                    vid.pause();
+                    ctrack.stop();
+                    trackingStarted = false;
 
-    // Cambiar el texto del botón "Iniciar video"
-    document.getElementById('startbutton').value = "Reanudar video";
-    document.getElementById('startbutton').disabled = false;
+                    // Cambiar el texto del botón "Iniciar video"
+                    document.getElementById('startbutton').value = "Reanudar video";
+                    document.getElementById('startbutton').disabled = false;
 
-    // No se inicia la grabación aquí, se manejará en handleRecordingStop()
-}
+                   
+                }
                 var resultsShown = false; // Variable de control para verificar si los resultados ya se han mostrado
 
                 function showResults() {
@@ -212,29 +222,18 @@
                     document.getElementById('clearButton').style.display = 'inline';
 
                     // Cambiar el texto del botón "Ver resultados" después de mostrarlos
-                    document.getElementById('showResultsButton').value = 'Ver resultados (Mostrados)';
+                    document.getElementById('showResultsButton').value = 'Resultados mostrados';
+
+                   
+                    // Realizar desplazamiento suave hacia abajo
+                    var chartContainer = document.getElementById('chartContainer');
+                    var chartContainerPosition = chartContainer.offsetTop; // Posición superior del elemento
+
+                    scrollToChartContainer(chartContainerPosition, window.scrollY);
+
                 }
 
 
-                /*function showResults() {
-                            if (emotionHistory.entries.length === 0) {
-                                alert("Aún no hay datos para mostrar. Active el monitoreo.");
-                                return;
-                            }
-
-                            // Calcular valores de tendencia central
-                            globalCentralTendencyData = calculateCentralTendency(emotionHistory.entries.map(entry => entry.emotions));
-
-                            // Crear un gráfico de barras con d3.js y mostrar el contenedor del gráfico
-                            createBarChart(globalCentralTendencyData);
-                            document.getElementById('chartContainer').style.display = 'block';
-                }*/
-
-                /*function clearChart() {
-                    // Eliminar la gráfica
-                    var chartContainer = document.getElementById('chartContainer');
-                    chartContainer.innerHTML = ''; // Eliminar contenido del contenedor
-                }*/
 
                 function clearResults() {
                     // Restablecer valores y ocultar resultados
@@ -242,64 +241,45 @@
                     resultsShown = false;
                     document.getElementById('chartContainer').style.display = 'none';
                     document.getElementById('clearButton').style.display = 'none';
-
-                // Borrar la gráfica
-                /*var chartContainer = document.getElementById('chartContainer');
-                chartContainer.innerHTML = '';  // Elimina el contenido del contenedor
-
-                // Ocultar el modal de detalles si está visible
-                var detailsModal = document.getElementById('detailsModal');
-                if (detailsModal.style.display === 'block') {
-                    detailsModal.style.display = 'none';
-                    showFpsIndicator(); // Mostrar nuevamente los fps al cerrar el modal
-                }*/
-
-                // Limpiar la gráfica
-                //clearChart();
-
-                // Recargar la página
-                window.location.reload();
-            }
+                    // Recargar la página
+                    window.location.reload();
+                }
 
                 function calculateCentralTendency(data) {
                     var result = {};
-
                     data.forEach(emotionEntry => {
                         if (emotionEntry && emotionEntry.forEach) {
                             emotionEntry.forEach(emotion => {
                                 if (!result[emotion.emotion]) {
                                     result[emotion.emotion] = [];
                                 }
-
-                    if (typeof emotion.value !== 'undefined' && emotion.value !== null && !isNaN(emotion.value)) {
-                        result[emotion.emotion].push(parseFloat(emotion.value));
+                                if (typeof emotion.value !== 'undefined' && emotion.value !== null && !isNaN(emotion.value)) {
+                                    result[emotion.emotion].push(parseFloat(emotion.value));
+                                }
+                            });
+                        }
+                    });
+                    // Calcular la media, mediana y moda para cada emoción
+                    for (var emotion in result) {
+                        var values = result[emotion];
+                        if (values.length > 0) {
+                            result[emotion] = {
+                                mean: isNaN(d3.mean(values)) ? "N/A" : d3.mean(values).toFixed(2),
+                                median: isNaN(d3.median(values)) ? "N/A" : d3.median(values).toFixed(2),
+                                mode: calculateMode(values).toFixed(2)
+                            };
+                        } else {
+                            // Tratamiento para valores vacíos si es necesario
+                            result[emotion] = {
+                                mean: "N/A",
+                                median: "N/A",
+                                mode: "N/A"
+                            };
+                         }
+                        }
+                        return result;
                     }
-                });
-            }
-        });
-
-                // Calcular la media, mediana y moda para cada emoción
-                for (var emotion in result) {
-                    var values = result[emotion];
-                    if (values.length > 0) {
-                        result[emotion] = {
-                            mean: isNaN(d3.mean(values)) ? "N/A" : d3.mean(values).toFixed(2),
-                            median: isNaN(d3.median(values)) ? "N/A" : d3.median(values).toFixed(2),
-                            mode: calculateMode(values).toFixed(2)
-                        };
-                    } else {
-                        // Tratamiento para valores vacíos si es necesario
-                        result[emotion] = {
-                            mean: "N/A",
-                            median: "N/A",
-                            mode: "N/A"
-                        };
-                    }
-                }
-
-                return result;
-            }
-            showDetails();
+                    showDetails();
 
                 function showDetails() {
                     var detailsModal = document.getElementById('detailsModal');
@@ -314,13 +294,13 @@
                         hideFpsIndicator();
 
                         var mostPresentEmotion = getMostPresentEmotion(globalCentralTendencyData);
-                        document.getElementById('mostPresentEmotion').innerText = "Evaluación emocional: " + getSpanishEmotionLabel(mostPresentEmotion);
+                        document.getElementById('mostPresentEmotion').innerText = "Evaluación emocional: " + modalEmotion (mostPresentEmotion);
                         
                         for (var emotion in globalCentralTendencyData) {
                     var container = document.createElement('div');
 
                     var header = document.createElement('h4');
-                    header.innerText = getSpanishEmotionLabel(emotion);
+                    header.innerText = modalEmotion (emotion);
                     container.appendChild(header);
 
                     var meanValue = document.createElement('p');
@@ -342,30 +322,9 @@
                     }
                 }
 
-                function getSpanishEmotionLabel(emotion) {
-                    // Traducción de las emociones
-                    switch (emotion) {
-                        case 'angry': return 'Enojado';
-                        case 'sad': return 'Triste';
-                        case 'surprised': return 'Sorprendido';
-                        case 'happy': return 'Feliz';
-                        default: return emotion;
-                    }
+                function modalEmotion(emotion) {
+                        return emotion;
                 }
-
-                function openDetailsModal() {
-                    showDetails();
-                    hideFpsIndicator();
-                }
-
-                function closeDetailsModal() {
-                    var detailsModal = document.getElementById('detailsModal');
-                    detailsModal.style.display = 'none';
-
-                    // Muestra nuevamente los fps al cerrar el modal
-                    showFpsIndicator();
-                }
-                
 
                 function openDetailsModal() {
                     var detailsModal = document.getElementById('detailsModal');
@@ -376,12 +335,10 @@
                 function closeDetailsModal() {
                     var detailsModal = document.getElementById('detailsModal');
                     detailsModal.style.display = 'none';
+
+                    // Muestra nuevamente los fps al cerrar el modal
                     showFpsIndicator();
                 }
-
-
-
-
 
                 function calculateMode(values) {
                     var frequencyMap = {};
@@ -400,13 +357,11 @@
                     return mode;
                 }
 
-               
-
                 function createBarChart(data) {
                     // Configuración del lienzo
-                    var margin = { top: 20, right: 20, bottom: 50, left: 40 },
-                        width = 500 - margin.left - margin.right,
-                        height = 300 - margin.top - margin.bottom;
+                    var margin = { top: 50, right: 150, bottom: 70, left: 70 }, // Aumentamos el margen derecho para hacer espacio para la leyenda
+                        width = 950 - margin.left - margin.right, // Aumentamos el ancho total del lienzo
+                        height = 400 - margin.top - margin.bottom;
 
                     // Escalas
                     var x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
@@ -422,13 +377,12 @@
                         'sad': '#ACF2EB',
                         'surprised': '#F27F1B',
                         'happy': '#BF3124'
-                    
                     };
 
                     // SVG
                     var svg = d3.select("#content").append("svg")
                         .attr("width", width + margin.left + margin.right)
-                        .attr("height", height + margin.top + margin.bottom)
+                        .attr("height", height + margin.top + margin.bottom + 50) // Añadimos espacio adicional en la parte inferior para el botón de detalles
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -448,7 +402,9 @@
                         .style("text-anchor", "end")
                         .attr("dx", "-.8em")
                         .attr("dy", "-.55em")
-                        .attr("transform", "rotate(-45)");
+                        .attr("transform", "rotate(-45)")
+                        .attr("fill", "#555")
+                        .attr("font-size", "12px");
 
                     svg.append("g")
                         .attr("class", "y axis")
@@ -458,24 +414,60 @@
                         .attr("y", 6)
                         .attr("dy", ".71em")
                         .style("text-anchor", "end")
+                        .attr("fill", "#555")
+                        .attr("font-size", "12px")
                         .text("Valor");
 
                     // Barras con transición
                     emotions.forEach(function (emotion) {
                         var bar = svg.selectAll(".bar-" + emotion)
-                            .data([data[emotion]])
-                            .enter().append("rect")
-                            .attr("class", "bar-" + emotion)
-                            .attr("x", function () { return x(emotion); })
-                            .attr("width", x.bandwidth())
-                            .attr("y", height)
-                            .attr("height", 0)
-                            .transition() // Agregar transición
-                            .duration(1300) // Duración de la transición en milisegundos
-                            .attr("y", function (d) { return y(d.mean); })
-                            .attr("height", function (d) { return height - y(d.mean); })
-                            .attr("fill", emotionColors[emotion]); // Asignar color según la emoción
+                        .data([data[emotion]])
+                        .enter().append("rect")
+                        .attr("class", "bar-" + emotion)
+                        .attr("x", function () { return x(emotion); })
+                        .attr("width", x.bandwidth())
+                        .attr("y", height)
+                        .attr("height", 0)
+                        .transition() // Agregar transición
+                        .duration(1300) // Duración de la transición en milisegundos
+                        .attr("y", function (d) { return y(d.mean); })
+                        .attr("height", function (d) { return height - y(d.mean); })
+                        .attr("fill", emotionColors[emotion]); // Asignar color según la emoción
                     });
+
+                    // Título
+                    svg.append("text")
+                        .attr("x", (width / 2))
+                        .attr("y", 0 - (margin.top / 2))
+                        .attr("text-anchor", "middle")
+                        .style("font-size", "16px")
+                        .style("text-decoration", "underline")
+                        .text("Gráfico de Barras de Emociones");
+
+                    // Leyenda
+                    var legend = svg.selectAll(".legend")
+                        .data(Object.keys(emotionColors))
+                        .enter().append("g")
+                        .attr("class", "legend")
+                        .attr("transform", function (d, i) { 
+                            var offset = (width - Object.keys(emotionColors).length * 100) / 2; 
+                            return "translate(" + (offset + i * 100) + "," + (height + margin.bottom + 20) + ")"; 
+                        }); 
+
+                    legend.append("rect")
+                        .attr("x", 0)
+                        .attr("y", 0)
+                        .attr("width", 15)
+                        .attr("height", 15)
+                        .style("fill", function (d) { return emotionColors[d]; });
+
+                    legend.append("text")
+                        .attr("x", 20)
+                        .attr("y", 9)
+                        .attr("dy", ".35em")
+                        .style("text-anchor", "start")
+                        .text(function (d) { return d; });
+
 
                         // Botón para ver detalles
                         svg.append("text")
@@ -488,7 +480,7 @@
                             .on("click", function () {
                                 showDetails(centralTendencyData);
                             });
-                    }
+                }
 
                 function hideFpsIndicator() {
                     stats.domElement.style.display = 'none';
@@ -512,9 +504,6 @@
 
                     return mostPresentEmotion;
                 }
-
-
-
 
 				function enablestart() {
 					var startbutton = document.getElementById('startbutton');
@@ -671,20 +660,12 @@
                     attr("dy", "1.2em").
                     attr("text-anchor", "middle").
                     text(function(datum) {
-                        // Traducción de las emociones
-                        switch (datum.emotion) {
-                            case 'angry': return 'Enojado';
-                            case 'sad': return 'Triste';
-                            case 'surprised': return 'Sorprendido';
-                            case 'happy': return 'Feliz';
-                            default: return datum.emotion;
-                        }
+                       return datum.emotion; 
                     }).
                     attr("fill", "white").
                     attr("class", "labels");
-
-
-                                    svg.selectAll("text.yAxis").
+                    
+                    svg.selectAll("text.yAxis").
                     data(emotionData).
                     enter().append("svg:text").
                     attr("x", function(datum, index) { return x(index) + barWidth; }).
@@ -693,15 +674,7 @@
                     attr("text-anchor", "middle").
                     attr("style", "font-size: 12").
                     text(function(datum) {
-                        
-                        // Traducción de las emociones
-                        switch (datum.emotion) {
-                            case 'angry': return 'Enojado';
-                            case 'sad': return 'Triste';
-                            case 'surprised': return 'Sorprendido';
-                            case 'happy': return 'Feliz';
-                            default: return datum.emotion;
-                        }
+                        return datum.emotion;
                     }).
                     attr("transform", "translate(0, 18)").
                     attr("class", "yAxis");

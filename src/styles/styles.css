@@ -1,9 +1,37 @@
 body {
-    font-family: 'Lato', sans-serif;
-    background-color: #f8f9fa;
-    margin: 0 auto;
-    max-width: 1150px;
+    overflow-x: hidden;
+    width: 100%;
+  height: 100%;
+  --color: rgba(7, 83, 146, 0.3);
+  background-color: #f8ffff;
+  background-image: linear-gradient(
+      180deg,
+      transparent 24%,
+      var(--color) 25%,
+      var(--color) 26%,
+      transparent 27%,
+      transparent 74%,
+      var(--color) 75%,
+      var(--color) 76%,
+      transparent 77%,
+      transparent
+    ),
+    linear-gradient(
+      45deg,
+      transparent 24%,
+      var(--color) 35%,
+      var(--color) 26%,
+      transparent 17%,
+      transparent 74%,
+      var(--color) 75%,
+      var(--color) 76%,
+      transparent 77%,
+      transparent
+    );
+  background-size: 55px 55px;
 }
+
+
 
 #overlay {
     position: absolute;
@@ -27,19 +55,39 @@ body {
 
 #container {
     position: relative;
-    width: 370px;
+    width: 400px;
+   
     margin: 0 auto;
+    background: #000000;
+    --gap: 5em;
+    --line: 1px;
+    --color: rgba(255, 255, 255, 0.2);
+  
+    background-image: linear-gradient(
+        -90deg,
+        transparent calc(var(--gap) - var(--line)),
+        var(--color) calc(var(--gap) - var(--line) + 1px),
+        var(--color) var(--gap)
+      ),
+      linear-gradient(
+        0deg,
+        transparent calc(var(--gap) - var(--line)),
+        var(--color) calc(var(--gap) - var(--line) + 1px),
+        var(--color) var(--gap)
+      );
+    background-size: var(--gap) var(--gap);
 }
 
 #content {
     margin-top: 50px;
     margin-left: auto;
     margin-right: auto;
-    max-width: 600px;
+    max-width: 800px;
     padding: 20px;
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    
 }
 
 h2 {
@@ -48,34 +96,41 @@ h2 {
 }
 
 .btn {
-    padding: 10px;
-    margin-right: 20px;
-    font-size: 14px;
-    cursor: pointer;
-    background-color: #4c82af;
-    color: white;
+    padding: 1.3em 3em;
+    width: 200px; /* Ancho fijo */
+    font-size: 11px; 
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    font-weight: 500;
+    color: #000;
+    background-color: #fff;
     border: none;
-    border-radius: 5px;
-    text-align: center;
-    text-decoration: none;
-    transition-duration: 0.4s;
-}
-
-.btn:last-child {
-    margin-right: 0; /* Elimina el margen derecho del Ãšltimo botÃģn */
-}
-
-.btn:hover {
-    background-color: white;
-    color: black;
-    border: 1px solid #4c82af;
-}
+    border-radius: 45px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .btn:hover {
+    background-color: #2384c4;
+    box-shadow: 0px 15px 20px rgba(46, 147, 229, 0.4);
+    color: #fff;
+    transform: translateY(-7px);
+  }
+  
+  .btn:active {
+    transform: translateY(-1px);
+  }
+  
+  
+  
 
 #controls {
     text-align: center;
     display: flex;
-    justify-content: center; /* Alinea los elementos en el centro horizontalmente */
-    margin-top: 20px; /* Ajusta el margen superior según sea necesario */
+    justify-content: center; 
+    margin-top: 20px; 
 }
 
 #emotion_container {
@@ -110,22 +165,34 @@ h2 {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 400%;
+    height: 500%;
     background-color: rgba(0, 0, 0, 0.8); /* Fondo opaco */
     z-index: 1000; /* Ajusta según sea necesario para asegurarte de que el modal esté en la parte superior */
 }
 
   
 .modal-content {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    width: 400px; /* Ancho fijo del modal */
+    height: auto; /* Altura automática según el contenido */
+    max-height: calc(100% - 40px); /* Máxima altura del modal (altura de la ventana - 40px de margen) */
+    margin-top: -300px; /* Un poco más arriba que la mitad de la altura del modal */
+    margin-left: -200px; /* Mitad del ancho del modal */
     background-color: #fff;
-    padding: 20px;
+    padding: 20px; /* Agregamos un padding al contenido del modal */
     border-radius: 5px;
-    z-index: 1001; /* Asegura que el contenido del modal esté en un nivel superior al fondo opaco del modal */
+    z-index: 1001;
+    transform: translate(-50%, -50%);
+}
+
+.modal-content p,
+.modal-content h3 {
+    margin: 0; /* Eliminamos los márgenes predeterminados para los elementos p y h3 */
+    font-size: 16px; /* Ajustamos el tamaño de la fuente según sea necesario */
+    line-height: 1.5; /* Ajustamos el espaciado entre líneas según sea necesario */
 }
 
 .close {
@@ -141,6 +208,44 @@ h2 {
     text-decoration: none;
     cursor: pointer;
 }
+.flip-scale-up-diag-2 {
+    -webkit-animation: flip-scale-up-diag-2 0.5s linear both;
+    animation: flip-scale-up-diag-2 0.5s linear both;
+}
+
+@-webkit-keyframes flip-scale-up-diag-2 {
+    0% {
+        -webkit-transform: scale(0) rotate3d(1, 0, 0, 90deg);
+        transform: scale(0) rotate3d(1, 0, 0, 90deg);
+    }
+    100% {
+        -webkit-transform: scale(1) rotate3d(1, 0, 0, 0deg);
+        transform: scale(1) rotate3d(1, 0, 0, 0deg);
+    }
+}
+@keyframes flip-scale-up-diag-2 {
+    0% {
+        -webkit-transform: scale(0) rotate3d(1, 0, 0, 90deg);
+        transform: scale(0) rotate3d(1, 0, 0, 90deg);
+    }
+    100% {
+        -webkit-transform: scale(1) rotate3d(1, 0, 0, 0deg);
+        transform: scale(1) rotate3d(1, 0, 0, 0deg);
+    }
+}
+.details-button {
+    fill: #3498db; /* Color de relleno del botón */
+    font-family: Arial, sans-serif; /* Familia de fuente del texto */
+    font-size: 14px; /* Tamaño de la fuente del texto */
+    font-weight: bold; /* Peso de la fuente del texto */
+    text-transform: uppercase; /* Convertir el texto a mayúsculas */
+    transition: fill 0.3s ease; /* Transición suave para el cambio de color */
+}
+
+.details-button:hover {
+    fill: #2980b9; /* Cambio de color al pasar el mouse sobre el botón */
+}
+  
 
 /* d3 *
 .bar {
