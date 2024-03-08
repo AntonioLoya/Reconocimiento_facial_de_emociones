@@ -143,12 +143,6 @@
                     // Limpiar grabación después de guardarla
                     recordedChunks = [];
                 }
-				
-                function stopRecording() {
-                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                        mediaRecorder.stop();
-                    }
-                }
                 function handleDataAvailable(event) {
                     if (event.data.size > 0) {
                         recordedChunks.push(event.data);
@@ -614,8 +608,7 @@
                 }
 				
 
-				delete emotionModel['disgusted'];
-				delete emotionModel['fear'];
+				
 				var ec = new emotionClassifier();
 				ec.init(emotionModel);
 				var emotionData = ec.getBlank();
