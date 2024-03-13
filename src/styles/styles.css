@@ -29,6 +29,7 @@ body {
       transparent
     );
   background-size: 55px 55px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 
@@ -135,19 +136,18 @@ h2 {
 
 #emotion_container {
     width: 600px;
+    margin: 0 auto;
 }
 
 #emotion_icons {
-    height: 50px;
-    padding-left: 40px;
+    text-align: center; /* Alinea horizontalmente los elementos */
+    margin-top: 20px;
 }
 
 .emotion_icon {
-    width : 40px;
-    height : 40px;
-    margin-top: 5px;
-    /*margin-left : 13px;*/
-    margin-left : 35px;
+    width: 40px;
+    height: 40px;
+    margin: 0 5px; /* Espacio entre los emoticones */
 }
 
 #emotion_chart, #emotion_icons {
@@ -155,9 +155,10 @@ h2 {
     width : 400px;
 }
 
+
 #icon1, #icon2, #icon3, #icon4, #icon5, #icon6 {
     visibility : hidden;
-}
+} 
 
 /* Estilos para el modal */
 .modal {
@@ -165,8 +166,8 @@ h2 {
     position: fixed;
     top: 0;
     left: 0;
-    width: 400%;
-    height: 500%;
+    width: 100vw;
+    height: 100vh;
     background-color: rgba(0, 0, 0, 0.8); /* Fondo opaco */
     z-index: 1000; /* Ajusta según sea necesario para asegurarte de que el modal esté en la parte superior */
 }
@@ -177,7 +178,7 @@ h2 {
     top: 50%;
     left: 50%;
     width: 400px; /* Ancho fijo del modal */
-    height: auto; /* Altura automática según el contenido */
+    height: 600px; /* Altura automática según el contenido */
     max-height: calc(100% - 40px); /* Máxima altura del modal (altura de la ventana - 40px de margen) */
     margin-top: -300px; /* Un poco más arriba que la mitad de la altura del modal */
     margin-left: -200px; /* Mitad del ancho del modal */
@@ -186,6 +187,7 @@ h2 {
     border-radius: 5px;
     z-index: 1001;
     transform: translate(-50%, -50%);
+    overflow-y: scroll;
 }
 
 .modal-content p,
