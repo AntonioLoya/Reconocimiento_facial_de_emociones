@@ -300,15 +300,15 @@
                     container.appendChild(header);
 
                     var meanValue = document.createElement('p');
-                    meanValue.innerText = "Media: " + globalCentralTendencyData[emotion].mean;
+                    meanValue.innerText = "Promedio de emoción : " + globalCentralTendencyData[emotion].mean;
                     container.appendChild(meanValue);
 
                     var medianValue = document.createElement('p');
-                    medianValue.innerText = "Mediana: " + globalCentralTendencyData[emotion].median;
+                    medianValue.innerText = "Valor medio de emoción : " + globalCentralTendencyData[emotion].median;
                     container.appendChild(medianValue);
 
                     var modeValue = document.createElement('p');
-                    modeValue.innerText = "Moda: " + globalCentralTendencyData[emotion].mode;
+                    modeValue.innerText = "Valor con mayor frecuencia : " + globalCentralTendencyData[emotion].mode;
                     container.appendChild(modeValue);
 
                     detailsContent.appendChild(container);
