@@ -712,5 +712,56 @@
 
     </script>
     </div>
+
+    <script>
+       
+function updateData(data) {
+    // Envía los datos al servidor
+    var nombreArchivo = 'emociones.json'; // Nombre del archivo donde se guardarán las emociones
+    var jsonData = {
+        nombre: nombreArchivo,
+        emociones: data
+    };
+
+    // Realiza una solicitud AJAX para enviar los datos al servidor
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'post.php');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            console.log('Datos de emociones guardados correctamente.');
+        } else {
+            console.error('Error al guardar los datos de emociones:', xhr.statusText);
+        }
+    };
+    xhr.send(JSON.stringify(jsonData));
+}
+
+
+       /*function guardarDatos() {
+            // Datos a enviar al servidor
+            var data = {
+                nombre: 'emociones.json', // Nombre del archivo
+                emociones: /* Aquí debes incluir los datos que deseas enviar al servidor 
+            };
+
+            // Realizar la solicitud AJAX
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'post.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Manejar la respuesta del servidor
+                    console.log(xhr.responseText);
+                    alert(xhr.responseText);
+                }
+            };
+            xhr.send(JSON.stringify(data));
+        }
+
+        // Llama a la función guardarDatos() cuando desees enviar los datos al servidor
+        // Por ejemplo, puedes llamarla cuando el usuario haga clic en un botón
+        document.getElementById('botonGuardar').addEventListener('click', guardarDatos); */ 
+
 </body>
 </html>
