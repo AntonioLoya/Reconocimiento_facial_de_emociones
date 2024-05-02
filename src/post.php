@@ -1,11 +1,14 @@
 <?php
+// Directorio donde se guardarán los archivos
+$directorio = 'archivos_json/';
+
 // Obtener los datos enviados por POST
 $data = json_decode(file_get_contents('php://input'), true);
 
 // Verificar si se recibieron los datos correctamente
 if ($data && isset($data['nombre']) && isset($data['emociones'])) {
     // Nombre del archivo JSON
-    $nombreArchivo = $data['nombre'];
+    $nombreArchivo = $directorio . $data['nombre'];
 
     // Datos de emociones
     $emociones = $data['emociones'];
