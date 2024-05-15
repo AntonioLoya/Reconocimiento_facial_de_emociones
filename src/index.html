@@ -63,6 +63,9 @@
             <input class="btn" type="button" value="Detener monitoreo" onclick="stopMonitoring()" id="stopbutton" style="width: 250px;">
             <input class="btn" type="button" value="Ver resultados" onclick="showResults()" id="showResultsButton" style="width: 250px; ">
             <input class="btn" type="button" value="Limpiar" onclick="clearResults()" id="clearButton" style="width: 250px; display: none;">
+            <input id="downloadJsonButton" class="btn" type="button" value="Descargar Datos JSON" onclick="downloadEmotionData()" style="width: 250px; display: none;">
+
+
            
         </div>
     </div>
@@ -226,6 +229,9 @@
                     var chartContainerPosition = chartContainer.offsetTop; // Posición superior del elemento
 
                     scrollToChartContainer(chartContainerPosition, window.scrollY);
+                     // Mostrar el botón de descarga JSON
+    var downloadButton = document.getElementById('downloadJsonButton');
+    downloadButton.style.display = 'inline';
 
                 }
 
@@ -300,7 +306,7 @@
                     container.appendChild(header);
 
                     var meanValue = document.createElement('p');
-                    meanValue.innerText = "Promedio de emoción : " + globalCentralTendencyData[emotion].mean;
+                    meanValue.innerText = "Primedio de emoción : " + globalCentralTendencyData[emotion].mean;
                     container.appendChild(meanValue);
 
                     var medianValue = document.createElement('p');
@@ -710,57 +716,26 @@
 					stats.update();
 				}, false);
 
-    </script>
-    </div>
+                function downloadEmotionData() {
+    // Convertir los datos a formato JSON
+    var jsonData = JSON.stringify(emotionHistory);
 
-    <script>
-       
-function updateData(data) {
-    // Envía los datos al servidor
-    var nombreArchivo = 'emociones.json'; // Nombre del archivo donde se guardarán las emociones
-    var jsonData = {
-        nombre: nombreArchivo,
-        emociones: data
-    };
+    // Crear un objeto Blob con los datos JSON
+    var blob = new Blob([jsonData], { type: 'application/json' });
 
-    // Realiza una solicitud AJAX para enviar los datos al servidor
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'post.php');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            console.log('Datos de emociones guardados correctamente.');
-        } else {
-            console.error('Error al guardar los datos de emociones:', xhr.statusText);
-        }
-    };
-    xhr.send(JSON.stringify(jsonData));
+    // Crear un enlace <a> para descargar el archivo JSON
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'emotion_data.json';
+
+    // Simular un clic en el enlace para iniciar la descarga
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
 
-       /*function guardarDatos() {
-            // Datos a enviar al servidor
-            var data = {
-                nombre: 'emociones.json', // Nombre del archivo
-                emociones: /* Aquí debes incluir los datos que deseas enviar al servidor 
-            };
-
-            // Realizar la solicitud AJAX
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'post.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    // Manejar la respuesta del servidor
-                    console.log(xhr.responseText);
-                    alert(xhr.responseText);
-                }
-            };
-            xhr.send(JSON.stringify(data));
-        }
-
-        // Llama a la función guardarDatos() cuando desees enviar los datos al servidor
-        // Por ejemplo, puedes llamarla cuando el usuario haga clic en un botón
-        document.getElementById('botonGuardar').addEventListener('click', guardarDatos); */ 
+    </script>
+    </div>
 </body>
 </html>

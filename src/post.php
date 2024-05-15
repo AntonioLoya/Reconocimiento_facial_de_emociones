@@ -2,6 +2,13 @@
 // Directorio donde se guardarán los archivos
 $directorio = 'archivos_json/';
 
+// Verificar si el directorio existe, si no, intenta crearlo
+if (!is_dir($directorio)) {
+    if (!mkdir($directorio, 0777, true)) {
+        die('Error: No se pudo crear el directorio ' . $directorio);
+    }
+}
+
 // Obtener los datos enviados por POST
 $data = json_decode(file_get_contents('php://input'), true);
 
@@ -18,7 +25,12 @@ if ($data && isset($data['nombre']) && isset($data['emociones'])) {
 
     // Guardar en un archivo JSON
     $archivo = fopen($nombreArchivo, 'w');
-    fwrite($archivo, $jsonString);
+    if (!$archivo) {
+        die('Error: No se pudo abrir el archivo ' . $nombreArchivo . ' para escribir');
+    }
+    if (!fwrite($archivo, $jsonString)) {
+        die('Error: No se pudo escribir en el archivo ' . $nombreArchivo);
+    }
     fclose($archivo);
 
     // Enviar una respuesta al cliente
@@ -28,3 +40,4 @@ if ($data && isset($data['nombre']) && isset($data['emociones'])) {
     echo 'Error: No se recibieron los datos correctamente.';
 }
 ?>
+
