@@ -59,13 +59,12 @@
     </div>
     <div id="controls">
         <div>
-            <input class="btn" type="button" value="Espera, cargando video" disabled="disabled" onclick="startVideo()" id="startbutton" style="width: 250px;">
+            <input class="btn" type="button" value="Iniciar con Grabación" onclick="startRecordingAndVideo()" id="startRecordingButton" style="width: 250px;">
+            <input class="btn" type="button" value="Iniciar sin Grabación" onclick="startVideo()" id="startbutton" style="width: 250px;">
             <input class="btn" type="button" value="Detener monitoreo" onclick="stopMonitoring()" id="stopbutton" style="width: 250px;">
             <input class="btn" type="button" value="Ver resultados" onclick="showResults()" id="showResultsButton" style="width: 250px; ">
             <input class="btn" type="button" value="Limpiar" onclick="clearResults()" id="clearButton" style="width: 250px; display: none;">
             <input id="downloadJsonButton" class="btn" type="button" value="Descargar Datos JSON" onclick="downloadEmotionData()" style="width: 250px; display: none;">
-
-
            
         </div>
     </div>
@@ -230,8 +229,13 @@
 
                     scrollToChartContainer(chartContainerPosition, window.scrollY);
                      // Mostrar el botón de descarga JSON
-    var downloadButton = document.getElementById('downloadJsonButton');
-    downloadButton.style.display = 'inline';
+                    var downloadButton = document.getElementById('downloadJsonButton');
+                    downloadButton.style.display = 'inline';
+
+                    // Ocultar los botones
+                    document.getElementById('startRecordingButton').style.display = 'none';
+                    document.getElementById('startbutton').style.display = 'none';
+                    document.getElementById('stopbutton').style.display = 'none';
 
                 }
 
@@ -511,7 +515,7 @@
 
 				function enablestart() {
 					var startbutton = document.getElementById('startbutton');
-					startbutton.value = "Iniciar video";
+					startbutton.value = "Iniciar sin Grabación";
 					startbutton.disabled = null;
 				}
 
@@ -582,8 +586,7 @@
                 ctrack.start(vid);
                 trackingStarted = true;
 
-                // start recording
-                startRecording();
+                
 
                 // start loop to draw face
                 drawLoop();
@@ -717,23 +720,26 @@
 				}, false);
 
                 function downloadEmotionData() {
-    // Convertir los datos a formato JSON
-    var jsonData = JSON.stringify(emotionHistory);
+                    // Convertir los datos a formato JSON
+                    var jsonData = JSON.stringify(emotionHistory);
 
-    // Crear un objeto Blob con los datos JSON
-    var blob = new Blob([jsonData], { type: 'application/json' });
+                    // Crear un objeto Blob con los datos JSON
+                    var blob = new Blob([jsonData], { type: 'application/json' });
 
-    // Crear un enlace <a> para descargar el archivo JSON
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'emotion_data.json';
+                    // Crear un enlace <a> para descargar el archivo JSON
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'emotion_data.json';
 
-    // Simular un clic en el enlace para iniciar la descarga
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-
+                    // Simular un clic en el enlace para iniciar la descarga
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+            }
+                function startRecordingAndVideo() {
+                startRecording(); // Llamada para iniciar la grabación
+                startVideo(); // Llamada para iniciar el video
+    }
 
     </script>
     </div>
